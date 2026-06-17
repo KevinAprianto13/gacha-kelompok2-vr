@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎰 Gacha Presentasi — Kelompok 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #0a0a0f;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(139,92,246,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(59,130,246,0.10) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container { position: relative; z-index: 1; width: 100%; max-width: 900px; }
+
+    /* Header */
+    .header { text-align: center; margin-bottom: 40px; }
+    .header .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #7c3aed, #3b82f6);
+      border-radius: 999px;
+      padding: 6px 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .header h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+    .header p { color: #94a3b8; font-size: 1rem; }
+
+    /* Gacha Button */
+    .gacha-btn-wrap { text-align: center; margin-bottom: 48px; }
+    #gachaBtn {
+      background: linear-gradient(135deg, #7c3aed, #3b82f6);
+      border: none;
+      border-radius: 16px;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding: 18px 52px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 0 32px rgba(124,58,237,0.5);
+      letter-spacing: 0.5px;
+    }
+    #gachaBtn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 0 48px rgba(124,58,237,0.7); }
+    #gachaBtn:active { transform: scale(0.97); }
+    #gachaBtn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .hint { color: #64748b; font-size: 0.85rem; margin-top: 12px; }
+
+    /* Result Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 24px 20px;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+      animation: none;
+    }
+    .card.revealed {
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes popIn {
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .card:hover {
+      border-color: rgba(139,92,246,0.5);
+      box-shadow: 0 8px 32px rgba(124,58,237,0.2);
+      transform: translateY(-4px);
+    }
+
+    .card-number {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #6366f1;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .card-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 8px;
+    }
+    .card-divider {
+      width: 32px;
+      height: 3px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    .card-topic {
+      font-size: 0.92rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .card-topic strong { color: #e2e8f0; }
+
+    /* Shuffle animation */
+    .card.shuffling {
+      animation: shake 0.1s infinite;
+      opacity: 1;
+      transform: none;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px) rotate(-1deg); }
+      75% { transform: translateX(4px) rotate(1deg); }
+    }
+
+    /* Result banner */
+    #resultBanner {
+      text-align: center;
+      margin-bottom: 32px;
+      display: none;
+    }
+    #resultBanner h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    #resultBanner p { color: #64748b; font-size: 0.9rem; margin-top: 6px; }
+
+    /* Colors for dividers */
+    .color-0 { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .color-1 { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .color-2 { background: linear-gradient(90deg, #10b981, #34d399); }
+    .color-3 { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .color-4 { background: linear-gradient(90deg, #ef4444, #f87171); }
+    .color-5 { background: linear-gradient(90deg, #ec4899, #f472b6); }
+
+    .emoji { font-size: 1.8rem; margin-bottom: 10px; display: block; }
+
+    footer { margin-top: 60px; color: #374151; font-size: 0.8rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">🎰 Kelompok 2 — Lost In Island</div>
+      <h1>Gacha Pembagian<br/>Presentasi</h1>
+      <p>Klik tombol untuk mengundi bagian presentasi secara acak & adil</p>
+    </div>
+
+    <div class="gacha-btn-wrap">
+      <button id="gachaBtn">🎲 Mulai Gacha!</button>
+      <p class="hint" id="hintText">6 anggota · 6 bagian · 100% adil</p>
+    </div>
+
+    <div id="resultBanner">
+      <h2>✨ Hasil Undian</h2>
+      <p>Klik <strong>Gacha lagi</strong> di atas untuk mengulang undian</p>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <footer>Semua anggota mendapat tepat 1 bagian · Shuffle Fisher-Yates · Kelompok 2 UTS</footer>
+  </div>
+
+  <script>
+    const members = [
+      "Kevin Aprianto",
+      "M. Azhar Khaira",
+      "Ridho Marwansyah",
+      "M. Rifqi Ihsandy",
+      "Abdul Dzaki Mahdi",
+      "Ghattan A. Jabbar",
+    ];
+
+    const topics = [
+      { emoji: "⚙️", title: "Pengembangan Core System & Locomotion", desc: "Sistem pergerakan karakter, kamera FPS, mouse look, footstep audio, dan animasi tubuh pemain (ArmSwing & HandBobber)." },
+      { emoji: "🤖", title: "Pengembangan NPC Behavior & Visual", desc: "Logika NPC, name tag yang selalu menghadap kamera, dan tampilan visual karakter pedagang." },
+      { emoji: "🛒", title: "Pengembangan Shop System", desc: "Database toko, logika beli barang, pengurangan koin, notifikasi Not Enough Coin & Sold Out." },
+      { emoji: "🏝️", title: "Desain Lingkungan & Perancangan Presentasi", desc: "Layout dunia 3D, kios NPC, lighting, dan struktur materi presentasi kelompok." },
+      { emoji: "🖥️", title: "UI Overlay & Optimasi WebGL", desc: "HUD layar, crosshair, Canvas Scaler untuk multi-resolusi, dan optimasi build WebGL ke Itch.io." },
+      { emoji: "📄", title: "Dokumen Laporan Akhir & Integrasi Aset", desc: "Penulisan laporan, integrasi aset visual (ikon, sprite), dan konsolidasi seluruh fitur ke scene akhir." },
+    ];
+
+    const colors = ["color-0","color-1","color-2","color-3","color-4","color-5"];
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function buildPlaceholders() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      members.forEach((name, i) => {
+        const card = document.createElement('div');
+        card.className = 'card shuffling';
+        card.id = `card-${i}`;
+        card.innerHTML = `
+          <div class="card-number">Mengundi...</div>
+          <div class="card-name">${name}</div>
+          <div class="card-divider ${colors[i]}"></div>
+          <div class="card-topic">⏳ Menunggu hasil...</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function revealCards(assignment) {
+      assignment.forEach((item, i) => {
+        setTimeout(() => {
+          const card = document.getElementById(`card-${i}`);
+          card.classList.remove('shuffling');
+          card.classList.add('revealed');
+          card.style.animationDelay = '0ms';
+          card.innerHTML = `
+            <span class="emoji">${item.topic.emoji}</span>
+            <div class="card-number">Bagian ${i + 1}</div>
+            <div class="card-name">${item.member}</div>
+            <div class="card-divider ${colors[i]}"></div>
+            <div class="card-topic"><strong>${item.topic.title}</strong><br/><br/>${item.topic.desc}</div>
+          `;
+        }, i * 300 + 600);
+      });
+    }
+
+    document.getElementById('gachaBtn').addEventListener('click', () => {
+      const btn = document.getElementById('gachaBtn');
+      const hint = document.getElementById('hintText');
+      const banner = document.getElementById('resultBanner');
+
+      btn.disabled = true;
+      btn.textContent = '🎲 Mengundi...';
+      banner.style.display = 'none';
+
+      buildPlaceholders();
+
+      const shuffledTopics = shuffle(topics);
+      const assignment = members.map((name, i) => ({ member: name, topic: shuffledTopics[i] }));
+
+      setTimeout(() => {
+        revealCards(assignment);
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = '🔄 Gacha Lagi!';
+          hint.textContent = 'Tidak puas? Klik lagi untuk undian ulang!';
+          banner.style.display = 'block';
+        }, members.length * 300 + 800);
+      }, 800);
+    });
+  </script>
+</body>
+</html>
